@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+
+enum Role {
+  Admin
+  Instructor
+  Student
+}
+
+enum PaymentType {
+  Rocket
+  Bkash
+  Nagad
+  Cash
+  CreditCard
+  DebitCard
+}
+
+model Users {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(100)
+  password  String   @db.VarChar(50)
+  name      String   @db.VarChar(50)
+  image     String?  @db.VarChar(255)
+  amount    Float    @default(0)
+
+  gender  Gender @default(Male)
+  dob    DateTime? 
+
+  token   String?   @db.VarChar(255)
+  role    Role     @default(Student)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  courses Courses[]
+  paymentTransation PaymentTransation[]
+  rating Rating[]
+}
+
+model Category{
+  id       Int      @id @default(autoincrement())
+  title     String   @db.VarChar(50)
+  description String @db.VarChar(2000)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  courses Courses[]
+
+}
+
+
+model Courses{
+  id       Int      @id @default(autoincrement())
+  title     String?   @db.VarChar(50)
+  description String? @db.VarChar(2000)
+  price    Float    @default(0)
+  discount Float?    @default(0)
+  code     String?   @unique @db.VarChar(10)
+  classDuration Int      @default(0)
+  courseDuration Int      @default(0)
+  credit   Float?    @default(0)
+  numberOfClasses Int?      @default(0)
+  status   Boolean  @default(true)
+  numebrOfClass Int?      @default(0)
+  availableSeats Int?      @default(0)
+  numberOfTests Int?      @default(0)
+  testDescription String? @db.VarChar(255)
+  numberOfNotes Int?      @default(0)
+  image     String?  @db.VarChar(255)
+  deadline DateTime? @default(now())
+
+  numberOfRating Int?      @default(0)
+  averageRating   Float?    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  instructor  Users? @relation(fields: [instructorId], references: [id])
+  instructorId Int?
+
+  category  Category? @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+
+  courseStructure CourseStructure? @relation(fields: [courseStructureId], references: [id])
+  courseStructureId Int?
+
+  // many to one
+  courseFeatures CourseFeatures[]
+
+  paymentTransation PaymentTransation[]
+  rating Rating[]
+}
+
+model CourseStructure{
+  id       Int      @id @default(autoincrement())
+  name    String?   @db.VarChar(255)
+  subtitle     String?   @db.VarChar(50)
+  description String? @db.VarChar(2000)
+  feature   String? @db.Text
+    
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  courses Courses[]
+  }
+
+model CourseFeatures{
+  id       Int      @id @default(autoincrement())
+  title     String?   @db.VarChar(50)
+  description String? @db.VarChar(1000)
+    
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  courses Courses? @relation(fields: [coursesId], references: [id])
+  coursesId Int?
+
+}
+
+model PaymentTransation{
+  id       Int      @id @default(autoincrement())
+  amount    Float    @default(0)
+  currency  String   @db.VarChar(10)
+  transactionId String?   @db.VarChar(50)
+  status    String?   @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  paymentType PaymentType @default(Bkash)
+
+  user  Users @relation(fields: [userId], references: [id])
+  userId Int
+
+  course  Courses @relation(fields: [courseId], references: [id])
+  courseId Int
+}
+
+
+model Rating{
+  id       Int      @id @default(autoincrement())
+  rating    Float    @default(0)
+  review    String? @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+
+  user  Users @relation(fields: [userId], references: [id])
+  userId Int
+
+  course  Courses @relation(fields: [courseId], references: [id])
+  courseId Int
+}
+
+model Services{
+  id       Int      @id @default(autoincrement())
+  title     String?   @db.VarChar(50)
+  description String? @db.VarChar(2000)
+  status   Boolean  @default(true)
+  thumbnail     String?  @db.VarChar(255)
+
+  details String? @db.VarChar(2000)
+  relatedServices String? @db.Text
+  contact String? @db.Text @default("")
+
+  images Images[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Images{
+  id       Int      @id @default(autoincrement())
+  status   Boolean  @default(true)
+  imageUrl     String?  @db.VarChar(255)
+
+  services Services? @relation(fields: [servicesId], references: [id])
+  servicesId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Events{
+  id       Int      @id @default(autoincrement())
+  imageUrl     String  @db.VarChar(255)
+    title     String   @db.VarChar(50)
+     description String? @db.VarChar(2000)
+     location String @db.VarChar(50)
+     heldAt DateTime @default(now())
+     duration Float @default(0)
+     price Float @default(0)
+
+}
